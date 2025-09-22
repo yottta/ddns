@@ -4,19 +4,23 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/sync/errgroup"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"os"
+	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/cloudflare/cloudflare-go/v6"
 	"github.com/cloudflare/cloudflare-go/v6/dns"
 )
 
 func main() {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	cfZoneId, _ := os.LookupEnv("CLOUDFLARE_ZONEID")
 	cfDnsEntryId, _ := os.LookupEnv("CLOUDFLARE_ENTRY_ID")
 

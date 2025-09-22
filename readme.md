@@ -1,6 +1,6 @@
 # DDNS CloudFlare
 
-This is a small tool to run inside your home lab that updates a record with the currently allocated IP from ISP.
+This is a small tool to run inside your home lab that updates a cloudflare DNS record with the currently ISP allocated IP.
 
 This tool requires 3 environment variables:
 * CLOUDFLARE_API_TOKEN - used by the cloudflare sdk to authenticate the requests. This needs to have read/write permissions on your dns entries
