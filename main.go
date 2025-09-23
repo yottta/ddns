@@ -17,12 +17,24 @@ import (
 	"github.com/cloudflare/cloudflare-go/v6/dns"
 )
 
+const (
+	cloudFlareZoneIdEnvVar     = "CLOUDFLARE_ZONEID"
+	cloudFlareDnsEntryIdEnvVar = "CLOUDFLARE_ENTRY_ID"
+)
+
+var (
+	client *cloudflare.Client
+
+	ErrEnvVarNotDefined = fmt.Errorf("env variable not defined but required")
+)
+
 func main() {
+	cfZoneId, cfDnsEntryId, err := input()
+	if err != nil {
+		log.Fatalf("%s", err)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-
-	cfZoneId, _ := os.LookupEnv("CLOUDFLARE_ZONEID")
-	cfDnsEntryId, _ := os.LookupEnv("CLOUDFLARE_ENTRY_ID")
 
 	var cfIP, currIP net.IP
 
@@ -84,9 +96,19 @@ func fetchCurrentPublicIP(ctx context.Context) (net.IP, error) {
 	return net.ParseIP(out.Http), nil
 }
 
-var (
-	client *cloudflare.Client
-)
+func input() (string, string, error) {
+	cfZoneId, ok := os.LookupEnv(cloudFlareZoneIdEnvVar)
+	if !ok {
+		return "", "", fmt.Errorf("%w: %s", ErrEnvVarNotDefined, cloudFlareZoneIdEnvVar)
+	}
+
+	cfDnsEntryId, _ := os.LookupEnv(cloudFlareDnsEntryIdEnvVar)
+	if !ok {
+		return "", "", fmt.Errorf("%w: %s", ErrEnvVarNotDefined, cloudFlareDnsEntryIdEnvVar)
+	}
+
+	return cfZoneId, cfDnsEntryId, nil
+}
 
 func cloudFlareClient() *cloudflare.Client {
 	if client == nil {
