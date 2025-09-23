@@ -1,0 +1,45 @@
+version: 2
+
+project_name: ddns
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    main: ./main.go
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+      -
+signs:
+  - artifacts: checksum
+    cmd: gpg2
+    args:
+      - "--batch"
+      - "-u"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+
+archives:
+  - formats: [ 'tar.gz' ]
+    id: targz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{- .Os }}_{{- .Arch }}"
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
+
+snapshot:
+  version_template: "{{ .Version }}-next"
+
+changelog:
+  use: github-native

@@ -9,12 +9,18 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
-
-	"golang.org/x/sync/errgroup"
 
 	"github.com/cloudflare/cloudflare-go/v6"
 	"github.com/cloudflare/cloudflare-go/v6/dns"
+	"golang.org/x/sync/errgroup"
+)
+
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
 )
 
 const (
@@ -29,9 +35,19 @@ var (
 )
 
 func main() {
+	if printVersion() {
+		// do not run further if was asked to print the version
+		return
+	}
+	if err := run(); err != nil {
+		log.Fatalf("%s", err)
+	}
+}
+
+func run() error {
 	cfZoneId, cfDnsEntryId, err := input()
 	if err != nil {
-		log.Fatalf("%s", err)
+		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -56,19 +72,20 @@ func main() {
 		return nil
 	})
 	if err := errg.Wait(); err != nil {
-		log.Fatalf("%s", err)
+		return err
 	}
 
 	if currIP.Equal(cfIP) {
 		log.Printf("no need to update the entry since it contains already the right value. CloudFlare: %s; Current IP: %s\n", cfIP, currIP)
-		return
+		return nil
 	}
-	fmt.Printf("current ip (%s) not the same with the one stored in CloudFlare (%s). updating...\n", currIP.String(), cfIP.String())
+	log.Printf("current ip (%s) not the same with the one stored in CloudFlare (%s). updating...\n", currIP.String(), cfIP.String())
 
 	if err := updateCloudFlareIP(ctx, cfZoneId, cfDnsEntryId, currIP.String()); err != nil {
-		log.Fatalf("failed updating cloudflare ip: %s", err)
+		return fmt.Errorf("failed updating cloudflare ip: %w", err)
 	}
-	fmt.Printf("update done from %s to %s", cfIP.String(), currIP.String())
+	log.Printf("update done from %s to %s", cfIP.String(), currIP.String())
+	return nil
 }
 
 func fetchCurrentPublicIP(ctx context.Context) (net.IP, error) {
@@ -136,4 +153,18 @@ func updateCloudFlareIP(ctx context.Context, zoneId, dnsEntryId, dnsEntryContent
 		return fmt.Errorf("failed updating the dns entry %q from zone %q to %q: %w", dnsEntryId, zoneId, dnsEntryContent, err)
 	}
 	return nil
+}
+
+func printVersion() bool {
+	if len(os.Args) == 1 {
+		return false
+	}
+	cmd := strings.TrimSpace(os.Args[1])
+	switch cmd {
+	case "version":
+		fmt.Printf("version: %s\n", version)
+		fmt.Printf("commit: %s\n", commit)
+		fmt.Printf("date: %s\n", date)
+	}
+	return true
 }
