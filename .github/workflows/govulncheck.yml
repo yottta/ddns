@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   run-govulncheck:
-#    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     uses: yottta/github-workflows/.github/workflows/govulncheck.yaml@add-govulncheck
     with:
       enabled: true
