@@ -12,7 +12,7 @@ permissions:
 jobs:
   run-go-checks:
     uses: yottta/github-workflows/.github/workflows/goreleaser.yaml@add-goreleaser-workflow
-    with:
+    secrets:
       gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
       passphrase: ${{ secrets.PASSPHRASE }}
-      github_token: ${{ secrets.GITHUB_TOKEN }}
+      release_github_token: ${{ secrets.GITHUB_TOKEN }}
