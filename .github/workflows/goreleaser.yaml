@@ -1,39 +1,18 @@
-name: goreleaser
+name: Release new version
 
 on:
   push:
     tags:
       - "*"
+  workflow_dispatch: {}
 
 permissions:
   contents: write
 
 jobs:
-  goreleaser:
-    runs-on: ubuntu-latest
-    environment: default
-    steps:
-      - name: Checkout
-        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
-        with:
-          fetch-depth: 0
-      - name: Import GPG key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec
-        with:
-          gpg_private_key: "${{ secrets.GPG_PRIVATE_KEY }}"
-          passphrase: "${{ secrets.PASSPHRASE }}"
-          trust_level: 5
-      - name: Set up Go
-        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00
-        with:
-          go-version-file: 'go.mod'
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a
-        with:
-          distribution: goreleaser
-          version: "~> v2"
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+  run-go-checks:
+    uses: yottta/github-workflows/.github/workflows/goreleaser.yaml@add-goreleaser-workflow
+    with:
+      gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+      passphrase: ${{ secrets.PASSPHRASE }}
+      github_token: ${{ secrets.GITHUB_TOKEN }}
