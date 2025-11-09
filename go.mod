@@ -3,7 +3,7 @@ module github.com/yottta/ddns
 go 1.25.4
 
 require (
-	github.com/cloudflare/cloudflare-go/v6 v6.1.0
+	github.com/cloudflare/cloudflare-go/v6 v6.2.0
 	golang.org/x/sync v0.17.0
 )
 
