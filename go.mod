@@ -1,6 +1,6 @@
 module github.com/yottta/ddns
 
-go 1.25.0
+go 1.25.4
 
 require (
 	github.com/cloudflare/cloudflare-go/v6 v6.1.0
