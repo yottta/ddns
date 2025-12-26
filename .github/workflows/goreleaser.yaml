@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  run-go-checks:
+  release-new-version:
     uses: yottta/github-workflows/.github/workflows/goreleaser.yaml@main
     secrets:
       gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
