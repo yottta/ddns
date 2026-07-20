@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	github.com/cloudflare/cloudflare-go/v6 v6.10.0
-	golang.org/x/sync v0.21.0
+	golang.org/x/sync v0.22.0
 )
 
 require (
